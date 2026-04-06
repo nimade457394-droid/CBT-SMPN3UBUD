@@ -20,8 +20,7 @@
 <body oncontextmenu="return false;">
 
 <div class="header-blue p-4 text-white flex items-center shadow-xl sticky top-0 z-50">
-  <img src="https://i.ibb.co.com/SY0R8c8/images.jpg" 
-       class="h-6 mr-2 bg-white p-1 rounded shadow-sm">
+  <img src="https://i.ibb.co.com/SY0R8c8/images.jpg" class="h-6 mr-2 bg-white p-1 rounded shadow-sm">
   <div>
     <h1 class="text-xl font-black uppercase leading-none">CBT SMPN 3 UBUD</h1>
     <p class="text-[9px] tracking-[0.1em] opacity-80 uppercase font-bold">Integritas & Kejujuran</p>
@@ -30,39 +29,38 @@
 
 <div id="app" class="container mx-auto p-4 max-w-6xl">
   
-<div id="loginPage" class="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-2xl mt-10 border border-gray-100 fade-in">
-  <div class="text-center mb-8">
-    <div class="flex justify-center mb-6">
-      <img src="https://i.ibb.co.com/SY0R8c8/images.jpg" 
-           class="h-24 w-24 object-contain">
-    </div>
-    <h2 class="text-3xl font-black text-gray-800">Login Sistem</h2>
-    <p class="text-gray-400 font-medium">Gunakan akun yang telah terdaftar</p>
-  </div>
-  </div>
-
-  <div class="space-y-5">
-    <select id="kelas" class="w-full border-2 p-4 rounded-2xl bg-gray-50 focus:ring-4 focus:ring-blue-100 outline-none transition">
-      <option value="">-- Pilih Kelas --</option>
-      <option>7A</option><option>7B</option><option>7C</option><option>7D</option><option>7E</option><option>7F</option><option>8A</option><option>8B</option><option>8C</option><option>8D</option><option>8E</option><option>8F</option><option>8G</option><option>9A</option><option>9B</option><option>9C</option><option>9D</option><option>9E</option><option>9F</option><option>9G</option><option>9H</option>
-    </select>
-    
-    <div class="relative">
-      <i class="fas fa-user absolute left-4 top-4 text-gray-400"></i>
-      <input type="text" id="username" placeholder="Username" class="w-full border-2 p-4 pl-12 rounded-2xl bg-gray-50 outline-none focus:ring-4 focus:ring-blue-100">
-    </div>
-    
-    <div class="relative">
-      <i class="fas fa-lock absolute left-4 top-4 text-gray-400"></i>
-      <input type="password" id="password" placeholder="Password" class="w-full border-2 p-4 pl-12 rounded-2xl bg-gray-50 outline-none focus:ring-4 focus:ring-blue-100">
+  <div id="loginPage" class="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-2xl mt-10 border border-gray-100 fade-in">
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-6">
+        <img src="https://i.ibb.co.com/SY0R8c8/images.jpg" class="h-24 w-24 object-contain">
+      </div>
+      <h2 class="text-3xl font-black text-gray-800">Login Sistem</h2>
+      <p class="text-gray-400 font-medium">Gunakan akun yang telah terdaftar</p>
     </div>
 
-    <div class="flex gap-4 pt-4">
-      <button onclick="handleLogin('siswa')" class="w-1/2 bg-blue-700 hover:bg-blue-800 text-white p-5 rounded-2xl font-black transition-all shadow-lg active:scale-95 uppercase">SISWA</button>
-      <button onclick="handleLogin('guru')" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white p-5 rounded-2xl font-black transition-all shadow-lg active:scale-95 uppercase">GURU</button>
+    <div class="space-y-5">
+      <select id="kelas" class="w-full border-2 p-4 rounded-2xl bg-gray-50 focus:ring-4 focus:ring-blue-100 outline-none transition">
+        <option value="">-- Pilih Kelas --</option>
+        <option>7A</option><option>7B</option><option>7C</option><option>7D</option><option>7E</option><option>7F</option><option>8A</option><option>8B</option><option>8C</option><option>8D</option><option>8E</option><option>8F</option><option>8G</option><option>9A</option><option>9B</option><option>9C</option><option>9D</option><option>9E</option><option>9F</option><option>9G</option><option>9H</option>
+      </select>
+      
+      <div class="relative">
+        <i class="fas fa-user absolute left-4 top-4 text-gray-400"></i>
+        <input type="text" id="username" placeholder="Username" class="w-full border-2 p-4 pl-12 rounded-2xl bg-gray-50 outline-none focus:ring-4 focus:ring-blue-100">
+      </div>
+      
+      <div class="relative">
+        <i class="fas fa-lock absolute left-4 top-4 text-gray-400"></i>
+        <input type="password" id="password" placeholder="Password" class="w-full border-2 p-4 pl-12 rounded-2xl bg-gray-50 outline-none focus:ring-4 focus:ring-blue-100">
+      </div>
+
+      <div class="flex gap-4 pt-4">
+        <button onclick="handleLogin('siswa')" class="w-1/2 bg-blue-700 hover:bg-blue-800 text-white p-5 rounded-2xl font-black transition-all shadow-lg active:scale-95 uppercase">SISWA</button>
+        <button onclick="handleLogin('guru')" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white p-5 rounded-2xl font-black transition-all shadow-lg active:scale-95 uppercase">GURU</button>
+      </div>
     </div>
   </div>
-</div>
+
   <div id="subjectPage" class="hidden text-center mt-10 fade-in">
     <div class="bg-white p-12 rounded-3xl shadow-2xl max-w-lg mx-auto border border-gray-50">
       <h2 id="welcomeUser" class="text-2xl font-black mb-2 text-gray-800"></h2>
@@ -124,6 +122,14 @@
     return await res.json();
   }
 
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   function kioskMode() {
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen();
@@ -162,33 +168,23 @@
     loadQuestions('PG', config.pgUrl);
   }
 
-async function loadQuestions(mode, url) {
-  currentMode = mode;
-  const resSoal = await callGAS('fetchQuestions', { url, type: mode });
-  
-  if (resSoal.length === 0) {
-    if (mode === 'PG') return alert("Gagal ambil soal PG!");
-    return finalSubmit();
-  }
+  async function loadQuestions(mode, url) {
+    currentMode = mode;
+    const resSoal = await callGAS('fetchQuestions', { url, type: mode });
+    
+    if (!resSoal || resSoal.length === 0) {
+      if (mode === 'PG') return alert("Gagal ambil soal PG!");
+      return finalSubmit();
+    }
 
-  // ACAK DI SINI: Kita acak urutan soalnya
-  questions = shuffleArray(resSoal);
+    // Acak soal
+    questions = shuffleArray(resSoal);
 
-  // Simpan kunci jawaban setelah diacak agar tetap sinkron dengan urutan baru
-  if (mode === 'PG') { 
-    pgKunci = questions.map(q => q.kunci); 
-    if (currentIdx === 0 && !timerInterval) startTimer(); 
-  }
-  
-  currentIdx = 0; 
-  renderNav(); 
-  showSoal(0);
-  
-  document.getElementById('subjectPage').classList.add('hidden');
-  document.getElementById('examPage').classList.remove('hidden');
-}
-    questions = resSoal;
-    if (mode === 'PG') { pgKunci = resSoal.map(q => q.kunci); startTimer(); }
+    if (mode === 'PG') { 
+      pgKunci = questions.map(q => q.kunci); 
+      if (!timerInterval) startTimer(); 
+    }
+    
     currentIdx = 0; renderNav(); showSoal(0);
     document.getElementById('subjectPage').classList.add('hidden');
     document.getElementById('examPage').classList.remove('hidden');
@@ -275,13 +271,6 @@ async function loadQuestions(mode, url) {
       <div class="mt-6 font-bold whitespace-pre-wrap">${s.esai || "Tidak ada jawaban esai."}</div>
     `;
   }
-    function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
 </script>
 </body>
 </html>

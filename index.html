@@ -162,13 +162,31 @@
     loadQuestions('PG', config.pgUrl);
   }
 
-  async function loadQuestions(mode, url) {
-    currentMode = mode;
-    const resSoal = await callGAS('fetchQuestions', { url, type: mode });
-    if (resSoal.length === 0) {
-      if (mode === 'PG') return alert("Gagal ambil soal PG!");
-      return finalSubmit();
-    }
+async function loadQuestions(mode, url) {
+  currentMode = mode;
+  const resSoal = await callGAS('fetchQuestions', { url, type: mode });
+  
+  if (resSoal.length === 0) {
+    if (mode === 'PG') return alert("Gagal ambil soal PG!");
+    return finalSubmit();
+  }
+
+  // ACAK DI SINI: Kita acak urutan soalnya
+  questions = shuffleArray(resSoal);
+
+  // Simpan kunci jawaban setelah diacak agar tetap sinkron dengan urutan baru
+  if (mode === 'PG') { 
+    pgKunci = questions.map(q => q.kunci); 
+    if (currentIdx === 0 && !timerInterval) startTimer(); 
+  }
+  
+  currentIdx = 0; 
+  renderNav(); 
+  showSoal(0);
+  
+  document.getElementById('subjectPage').classList.add('hidden');
+  document.getElementById('examPage').classList.remove('hidden');
+}
     questions = resSoal;
     if (mode === 'PG') { pgKunci = resSoal.map(q => q.kunci); startTimer(); }
     currentIdx = 0; renderNav(); showSoal(0);
@@ -257,6 +275,13 @@
       <div class="mt-6 font-bold whitespace-pre-wrap">${s.esai || "Tidak ada jawaban esai."}</div>
     `;
   }
+    function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 </script>
 </body>
 </html>

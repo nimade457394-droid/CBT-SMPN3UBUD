@@ -6,6 +6,21 @@
     <title>CBT SMP Negeri 3 Ubud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         body { background-color: #f8fafc; user-select: none; -webkit-user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .header-blue { background-color: #1e3a8a; }
@@ -15,6 +30,8 @@
         .hidden { display: none; }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Memastikan rumus matematika tidak meluap dari container */
+        .mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -190,7 +207,6 @@
     
     examConfig = config; 
 
-    // Ambil PG dan Esai Sekaligus
     const [resPG, resESAI] = await Promise.all([
         callGAS('fetchQuestions', { url: config.pgUrl, type: 'PG' }),
         callGAS('fetchQuestions', { url: config.esaiUrl, type: 'ESAI' })
@@ -211,7 +227,6 @@
     currentMode = mode;
     questions = (mode === 'PG') ? questionsPG : questionsESAI;
     
-    // Update Tampilan Tab
     const tPG = document.getElementById('btnTabPG');
     const tESAI = document.getElementById('btnTabESAI');
     const label = document.getElementById('labelMode');
@@ -260,12 +275,16 @@
     }
 
     document.getElementById('soalContainer').innerHTML = h;
-    document.getElementById('prevBtn').classList.toggle('hidden', idx === 0);
     
+    // --- PENAMBAHAN MATHJAX TYPESET ---
+    // Meminta MathJax untuk merender ulang rumus di dalam soalContainer
+    if (window.MathJax) {
+        MathJax.typesetPromise([document.getElementById('soalContainer')]).catch((err) => console.log(err));
+    }
+
+    document.getElementById('prevBtn').classList.toggle('hidden', idx === 0);
     const isLast = idx === questions.length - 1;
     document.getElementById('nextBtn').classList.toggle('hidden', isLast);
-    
-    // Tombol Finish hanya muncul di soal terakhir Esai
     const fBtn = document.getElementById('finishBtn');
     fBtn.classList.toggle('hidden', !(currentMode === 'ESAI' && isLast));
     
@@ -336,6 +355,10 @@
       </div>
       <div class="mt-6 p-4 bg-white border rounded-xl font-medium whitespace-pre-wrap">${s.esai || "Tidak ada jawaban esai."}</div>
     `;
+    // Render MathJax juga di dashboard guru jika ada rumus
+    if (window.MathJax) {
+        MathJax.typesetPromise([document.getElementById('detailDiv')]);
+    }
   }
 </script>
 </body>

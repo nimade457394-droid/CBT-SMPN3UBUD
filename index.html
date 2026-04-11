@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT SMP Negeri 3 Ubud</title>
+    <title>CBT SMP Negeri 3 Ubud - Secured</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -30,11 +30,18 @@
         .hidden { display: none; }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* Memastikan rumus matematika tidak meluap dari container */
         .mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+        
+        /* Overlay untuk peringatan keras */
+        #securityOverlay { display: none; position: fixed; top: 0; left: 0; w-full: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; color: white; text-align: center; padding-top: 20%; }
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+<div id="securityOverlay">
+    <h1 class="text-4xl font-black mb-4">AKSES DIBLOKIR</h1>
+    <p class="text-xl">Jangan gunakan Split Screen atau mengecilkan jendela browser!<br>Kembalikan ke layar penuh untuk melanjutkan.</p>
+</div>
 
 <div class="header-blue p-4 text-white flex items-center shadow-xl sticky top-0 z-50">
   <img src="https://i.ibb.co.com/SY0R8c8/images.jpg" class="h-6 mr-2 bg-white p-1 rounded shadow-sm">
@@ -136,16 +143,23 @@
 
 <script>
   // GANTI INI DENGAN URL WEB APP ANDA
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwZbaVOTsMXLgq_y0qG8O9LdlensT-e68axkX9DckmawiGUzJZVcs2bH4DDrgcO-PQmow/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzMY302Rtn_uvkGraApt7ZpM_XGQ0QFMT3lZbB9PNw14Fi8uO0AGB3067tCX5n4GAo-Ag/exec";
 
-  let userData = {}, questions = [], questionsPG = [], questionsESAI = [], pgKunci = [], currentIdx = 0, answers = {}, timeLeft = 0, timerInterval, currentMode = 'PG', examConfig = {}, localRekap = [], cheatCount = 0;
+  let userData = {}, questions = [], questionsPG = [], questionsESAI = [], pgKunci = [], currentIdx = 0, answers = {}, timeLeft = 0, timerInterval, currentMode = 'PG', examConfig = {}, localRekap = [];
+  
+  // --- VARIABEL KEAMANAN ---
+  let cheatCount = 0;
+  let cheatLog = [];
+  let isWarningActive = false;
 
   async function callGAS(action, data = {}) {
-    const res = await fetch(GAS_URL, {
-      method: "POST",
-      body: JSON.stringify({ action, ...data })
-    });
-    return await res.json();
+    try {
+        const res = await fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify({ action, ...data })
+        });
+        return await res.json();
+    } catch (e) { console.error("GAS Error:", e); }
   }
 
   function shuffleArray(array) {
@@ -163,11 +177,36 @@
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   }
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && timeLeft > 0) {
+  // --- LOGIKA DETEKSI KECURANGAN ---
+  window.addEventListener('blur', () => {
+    if (timeLeft > 0 && !isWarningActive) {
       cheatCount++;
-      if (cheatCount >= 3) { alert("SISTEM: Anda melanggar batas (3x pindah tab)."); finalSubmit(); }
-      else { alert("PERINGATAN: Jangan keluar layar! Pelanggaran: " + cheatCount + "/3"); }
+      let t = new Date().toLocaleTimeString();
+      cheatLog.push(`[${t}] Keluar Layar/Pindah Tab`);
+      
+      if (cheatCount >= 3) { 
+        alert("SISTEM: Anda melanggar batas (3x pindah tab). Jawaban dikirim otomatis."); 
+        finalSubmit("Diskualifikasi (Pindah Tab)"); 
+      }
+      else { 
+        alert("PERINGATAN: Jangan keluar layar! Pelanggaran: " + cheatCount + "/3"); 
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (timeLeft > 0) {
+        // Jika lebar jendela kurang dari 80% layar asli, asumsikan split screen
+        if (window.innerWidth < screen.width * 0.8) {
+            document.getElementById('securityOverlay').style.display = 'block';
+            if(!isWarningActive) {
+                isWarningActive = true;
+                cheatLog.push(`[${new Date().toLocaleTimeString()}] Deteksi Split Screen`);
+            }
+        } else {
+            document.getElementById('securityOverlay').style.display = 'none';
+            isWarningActive = false;
+        }
     }
   });
 
@@ -176,14 +215,14 @@
     if(!kls || !user || !pass) return alert("Lengkapi data login!");
     
     const res = await callGAS('loginUser', { kelas: kls, username: user, password: pass, role: role });
-    if (res.success) {
+    if (res && res.success) {
       userData = { ...res, kelas: kls };
       document.getElementById('loginPage').classList.add('hidden');
       if (role === 'siswa') {
         document.getElementById('subjectPage').classList.remove('hidden');
         document.getElementById('welcomeUser').innerText = "Halo, " + res.nama;
       } else { document.getElementById('teacherDashboard').classList.remove('hidden'); }
-    } else alert(res.msg);
+    } else alert(res ? res.msg : "Koneksi Gagal");
   }
 
   async function startExamSequence() {
@@ -276,8 +315,6 @@
 
     document.getElementById('soalContainer').innerHTML = h;
     
-    // --- PENAMBAHAN MATHJAX TYPESET ---
-    // Meminta MathJax untuk merender ulang rumus di dalam soalContainer
     if (window.MathJax) {
         MathJax.typesetPromise([document.getElementById('soalContainer')]).catch((err) => console.log(err));
     }
@@ -297,8 +334,8 @@
   }
 
   function handleStepTransition() {
-    if (confirm("Kumpulkan semua jawaban sekarang? Pastikan PG dan Esai sudah terisi.")) {
-        finalSubmit();
+    if (confirm("Kumpulkan semua jawaban sekarang?")) {
+        finalSubmit("Selesai Normal");
     }
   }
 
@@ -324,14 +361,25 @@
     timerInterval = setInterval(() => {
       let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
       document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-      if (timeLeft <= 0) { clearInterval(timerInterval); finalSubmit(); }
+      if (timeLeft <= 0) { clearInterval(timerInterval); finalSubmit("Waktu Habis"); }
       timeLeft--;
     }, 1000);
   }
 
-  async function finalSubmit() {
-    document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN... MOHON TUNGGU.</div>";
-    await callGAS('processFinalSubmit', { kelas: userData.kelas, row: userData.row, answers, pgKunci });
+  async function finalSubmit(statusOverride = "Selesai Normal") {
+    clearInterval(timerInterval);
+    document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN...<br><span class='text-sm font-normal'>Status: "+statusOverride+"</span></div>";
+    
+    await callGAS('processFinalSubmit', { 
+        kelas: userData.kelas, 
+        row: userData.row, 
+        answers, 
+        pgKunci,
+        status: statusOverride,
+        pelanggaran: cheatCount,
+        catatan: cheatLog.join("\n")
+    });
+    
     alert("Jawaban Berhasil Terkirim!"); 
     location.reload();
   }
@@ -349,13 +397,21 @@
     const s = localRekap[i];
     document.getElementById('detailDiv').innerHTML = `
       <h4 class="text-2xl font-black">${s.nama}</h4>
+      <div class="flex gap-2 mb-4 mt-2">
+        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold uppercase">${s.status || 'Selesai'}</span>
+        <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold uppercase">Pelanggaran: ${s.pelanggaran || 0}</span>
+      </div>
       <div class="grid grid-cols-2 gap-4 mt-4">
         <div class="bg-emerald-100 p-4 rounded-xl text-center font-bold">Benar: ${s.benar}</div>
         <div class="bg-red-100 p-4 rounded-xl text-center font-bold">Salah: ${s.salah}</div>
       </div>
-      <div class="mt-6 p-4 bg-white border rounded-xl font-medium whitespace-pre-wrap">${s.esai || "Tidak ada jawaban esai."}</div>
+      <div class="mt-6">
+        <p class="font-bold text-sm mb-1 text-gray-400 uppercase italic">Log Pelanggaran:</p>
+        <div class="p-3 bg-red-50 text-red-700 text-xs font-mono rounded-lg border border-red-100 whitespace-pre-wrap mb-4">${s.catatan || 'Tidak ada pelanggaran tercatat'}</div>
+        <p class="font-bold text-sm mb-1 text-gray-400 uppercase italic">Jawaban Esai:</p>
+        <div class="p-4 bg-white border rounded-xl font-medium whitespace-pre-wrap">${s.esai || "Tidak ada jawaban esai."}</div>
+      </div>
     `;
-    // Render MathJax juga di dashboard guru jika ada rumus
     if (window.MathJax) {
         MathJax.typesetPromise([document.getElementById('detailDiv')]);
     }

@@ -142,8 +142,7 @@
 </div>
 
 <script>
-  // GANTI URL INI JIKA ANDA MEMBUAT DEPLOYMENT BARU
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwbT7ChC-NOg8TgRyyMyXRfxEu0LDyVGQHO6MAl4Sl7569b_0h_uQo6i0TDSzqswukH/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyK89BNaN6F3ne0UTQySwQS-7nPBJa0nFlX04cz9jwSuwh3Ih82cOruLt_dh3kL1Qhm/exec";
 
   let userData = {}, questions = [], questionsPG = [], questionsESAI = [], pgKunci = [], currentIdx = 0, answers = {}, timeLeft = 0, timerInterval, currentMode = 'PG', examConfig = {}, localRekap = [];
   
@@ -235,22 +234,27 @@
     kioskMode();
     const config = await callGAS('getExamConfig', { mapel, tingkat: tk });
     
-    if (!config) {
-        alert("Soal tidak ditemukan!");
+    if (!config || (!config.pgUrl && !config.esaiUrl)) {
+        alert("Soal tidak ditemukan di Sheet Guru! Periksa kembali kesesuaian Nama Mapel dan Tingkat Kelas.");
         btn.innerText = "MULAI SEKARANG";
         btn.disabled = false;
         return;
     }
     
-    // Durasi diambil dinamis dari Kolom K sheet Guru (dalam menit), lalu dikali 60 detik
     timeLeft = (config.durasi || 60) * 60;
-    
     examConfig = config; 
 
     const [resPG, resESAI] = await Promise.all([
         callGAS('fetchQuestions', { url: config.pgUrl, type: 'PG' }),
         callGAS('fetchQuestions', { url: config.esaiUrl, type: 'ESAI' })
     ]);
+
+    if ((!resPG || resPG.length === 0) && (!resESAI || resESAI.length === 0)) {
+        alert("Gagal membaca file Google Doc! Pastikan tautan di Sheet Guru benar dan izin akses sudah 'Anyone with the link can view'.");
+        btn.innerText = "MULAI SEKARANG";
+        btn.disabled = false;
+        return;
+    }
 
     questionsPG = shuffleArray(resPG || []);
     questionsESAI = shuffleArray(resESAI || []);

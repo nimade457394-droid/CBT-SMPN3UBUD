@@ -274,7 +274,6 @@
   // --- MULAI UJIAN ---
   async function startExamSequence() {
     const mapel = document.getElementById('mapel').value;
-    // Ambil digit pertama kelas (contoh: 7A -> 7, 8B -> 8, 9C -> 9)
     const tk = userData.kelas ? userData.kelas.charAt(0) : "9";
     
     const btn = document.getElementById('btnMulai');
@@ -285,7 +284,7 @@
     const config = await callGAS('getExamConfig', { mapel, tingkat: tk });
     
     if (!config) {
-        alert("Soal/Konfigurasi Ujian tidak ditemukan pada Sheet Guru! Pastikan Tingkat Kelas (Kolom E) dan Nama Mapel di Sheet Guru sudah diisi.");
+        alert("Konfigurasi ujian tidak ditemukan! Pastikan nama Mata Pelajaran di Sheet Guru sesuai.");
         btn.innerText = "MULAI SEKARANG";
         btn.disabled = false;
         return;
@@ -293,11 +292,10 @@
     
     examConfig = config; 
 
-    // MENGAMBIL WAKTU DARI KOLOM N (Dalam Menit)
     if (config.durasi && !isNaN(config.durasi)) {
         timeLeft = parseInt(config.durasi) * 60;
     } else {
-        timeLeft = 60 * 60; // Fallback 60 menit
+        timeLeft = 60 * 60;
     }
 
     const [resPG, resESAI] = await Promise.all([
@@ -309,7 +307,7 @@
     questionsESAI = shuffleArray(resESAI || []);
     
     if (questionsPG.length === 0 && questionsESAI.length === 0) {
-        alert("Gagal mengambil soal! Pastikan Link Google Doc PG & Esai di Sheet Guru sudah 'Anyone with link can view'.");
+        alert("Gagal mengambil soal! Pastikan file Google Doc Soal di Sheet Guru sudah 'Anyone with the link can view'.");
         btn.innerText = "MULAI SEKARANG";
         btn.disabled = false;
         return;

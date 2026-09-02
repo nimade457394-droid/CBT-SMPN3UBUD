@@ -254,7 +254,7 @@
           user = document.getElementById('username').value, 
           pass = document.getElementById('password').value;
     
-    if(!kls || !user || !pass) return alert("Lengkapi data login!");
+    if((role === 'siswa' && !kls) || !user || !pass) return alert("Lengkapi data login!");
     
     const res = await callGAS('loginUser', { kelas: kls, username: user, password: pass, role: role });
     if (res && res.success) {
@@ -271,10 +271,11 @@
     }
   }
 
-  // --- MULAI UJIAN & SET WAKTU DARI KOLOM N ---
+  // --- MULAI UJIAN ---
   async function startExamSequence() {
     const mapel = document.getElementById('mapel').value;
-    const tk = userData.kelas.substring(0, 1); // Mengambil tingkat (misal 7, 8, atau 9)
+    // Ambil digit pertama kelas (contoh: 7A -> 7, 8B -> 8, 9C -> 9)
+    const tk = userData.kelas ? userData.kelas.charAt(0) : "9";
     
     const btn = document.getElementById('btnMulai');
     btn.innerText = "MEMUAT SOAL...";
@@ -284,7 +285,7 @@
     const config = await callGAS('getExamConfig', { mapel, tingkat: tk });
     
     if (!config) {
-        alert("Soal atau Konfigurasi Ujian tidak ditemukan!");
+        alert("Soal/Konfigurasi Ujian tidak ditemukan pada Sheet Guru! Pastikan Tingkat Kelas (Kolom E) dan Nama Mapel di Sheet Guru sudah diisi.");
         btn.innerText = "MULAI SEKARANG";
         btn.disabled = false;
         return;
@@ -292,11 +293,11 @@
     
     examConfig = config; 
 
-    // MENGAMBIL WAKTU DARI KOLOM N (Dalam Menit) BILA TERSEDIA
+    // MENGAMBIL WAKTU DARI KOLOM N (Dalam Menit)
     if (config.durasi && !isNaN(config.durasi)) {
-        timeLeft = parseInt(config.durasi) * 60; // Mengubah menit ke detik
+        timeLeft = parseInt(config.durasi) * 60;
     } else {
-        timeLeft = 60 * 60; // Fallback jika kolom N kosong (default 60 menit)
+        timeLeft = 60 * 60; // Fallback 60 menit
     }
 
     const [resPG, resESAI] = await Promise.all([
@@ -306,6 +307,14 @@
 
     questionsPG = shuffleArray(resPG || []);
     questionsESAI = shuffleArray(resESAI || []);
+    
+    if (questionsPG.length === 0 && questionsESAI.length === 0) {
+        alert("Gagal mengambil soal! Pastikan Link Google Doc PG & Esai di Sheet Guru sudah 'Anyone with link can view'.");
+        btn.innerText = "MULAI SEKARANG";
+        btn.disabled = false;
+        return;
+    }
+
     pgKunci = questionsPG.map(q => q.kunci);
 
     if (!timerInterval) startTimer();
@@ -375,10 +384,10 @@
         MathJax.typesetPromise([document.getElementById('soalContainer')]).catch((err) => console.error(err));
     }
 
-    document.getElementById('prevBtn').classList.toggle('hidden', idx === 0);
+    document.getElementById('prevBtn').classList.toggle('hidden', idx === 0 && currentMode === 'PG');
     
     const isLast = idx === questions.length - 1;
-    document.getElementById('nextBtn').classList.toggle('hidden', isLast);
+    document.getElementById('nextBtn').classList.toggle('hidden', isLast && currentMode === 'ESAI');
     
     const fBtn = document.getElementById('finishBtn');
     fBtn.classList.toggle('hidden', !(currentMode === 'ESAI' && isLast));
@@ -414,7 +423,14 @@
   }
 
   function changeSoal(s) { 
-    showSoal(currentIdx + s); 
+    if (currentIdx + s >= questions.length && currentMode === 'PG') {
+        switchMode('ESAI');
+    } else if (currentIdx + s < 0 && currentMode === 'ESAI') {
+        switchMode('PG');
+        showSoal(questionsPG.length - 1);
+    } else {
+        showSoal(currentIdx + s); 
+    }
   }
 
   function startTimer() {

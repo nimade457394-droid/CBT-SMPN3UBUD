@@ -382,8 +382,8 @@
       
       const fBtn = document.getElementById('finishBtn');
       // Jika di tab ESAI dan di nomor terakhir ESAI, atau jika tidak ada soal ESAI sama sekali lalu berada di nomor terakhir PG
-      const isOverallFinishAvailable = (currentMode === 'ESAI' && isLast) || (questionsESAI.length === 0 && currentMode === 'PG' && isLast);
-      fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
+     const isOverallFinishAvailable = (currentMode === 'ESAI' && isLast);
+fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
       
       updateNavUI();
     }

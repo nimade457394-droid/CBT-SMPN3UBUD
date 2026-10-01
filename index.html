@@ -430,22 +430,28 @@ fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
     }
 
     async function finalSubmit(statusOverride = "Selesai Normal") {
-      clearInterval(timerInterval);
-      document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN...<br><span class='text-sm font-normal'>Status: "+statusOverride+"</span></div>";
-      
-      await callGAS('processFinalSubmit', {
-        kelas: userData.kelas, 
-        row: userData.row, 
-        answers, 
-        soalUrl: examConfig.soalUrl,
-        status: statusOverride, 
-        pelanggaran: cheatCount, 
-        catatan: cheatLog.join("\n") 
-      });
-      
-      alert("Jawaban Berhasil Terkirim!");
-      location.reload();
-    }
+  clearInterval(timerInterval);
+  document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN...<br><span class='text-sm font-normal'>Status: "+statusOverride+"</span></div>";
+  
+  // Memetakan kunci jawaban PG yang sesuai dengan urutan soal acak di layar siswa
+  let keysMap = {};
+  questionsPG.forEach((q, idx) => {
+    keysMap[idx] = q.kunci;
+  });
+
+  await callGAS('processFinalSubmit', {
+    kelas: userData.kelas, 
+    row: userData.row, 
+    answers: answers, 
+    keysMap: keysMap, // Mengirim peta kunci acak ke Apps Script
+    status: statusOverride, 
+    pelanggaran: cheatCount, 
+    catatan: cheatLog.join("\n") 
+  });
+  
+  alert("Jawaban Berhasil Terkirim!");
+  location.reload();
+}
 
     async function loadRekap(kls) {
       if(!kls) return;

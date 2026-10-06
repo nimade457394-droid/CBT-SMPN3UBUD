@@ -192,6 +192,7 @@
     let userData = {}, questions = [], questionsPG = [], questionsESAI = [];
     let currentIdx = 0, answers = {}, timeLeft = 0, timerInterval;
     let currentMode = 'PG', examConfig = {}, localRekap = [];
+    let selectedMapel = ""; // Variabel penampung mapel yang dipilih
     
     let cheatCount = 0;
     let cheatLog = [];
@@ -224,7 +225,6 @@
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
     }
 
-    // --- KEAMANAN DETEKSI TAB/WINDOW ---
     window.addEventListener('blur', () => {
       if (timeLeft > 0 && !isWarningActive) {
         cheatCount++;
@@ -276,6 +276,7 @@
 
     async function startExamSequence() {
       const mapel = document.getElementById('mapel').value;
+      selectedMapel = mapel; // Simpan mapel yang dipilih
       const tk = userData.kelas.substring(0, 1);
       const btn = document.getElementById('btnMulai');
       btn.innerText = "MEMUAT SOAL...";
@@ -308,7 +309,6 @@
       
       if (!timerInterval) startTimer();
       
-      // Jika ada soal PG, langsung buka tab PG. Jika tidak, buka tab ESAI.
       if (questionsPG.length > 0) {
         switchMode('PG');
       } else {
@@ -381,9 +381,8 @@
       document.getElementById('nextBtn').classList.toggle('hidden', isLast);
       
       const fBtn = document.getElementById('finishBtn');
-      // Jika di tab ESAI dan di nomor terakhir ESAI, atau jika tidak ada soal ESAI sama sekali lalu berada di nomor terakhir PG
-     const isOverallFinishAvailable = (currentMode === 'ESAI' && isLast);
-fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
+      const isOverallFinishAvailable = (currentMode === 'ESAI' && isLast);
+      fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
       
       updateNavUI();
     }
@@ -430,28 +429,28 @@ fBtn.classList.toggle('hidden', !isOverallFinishAvailable);
     }
 
     async function finalSubmit(statusOverride = "Selesai Normal") {
-  clearInterval(timerInterval);
-  document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN...<br><span class='text-sm font-normal'>Status: "+statusOverride+"</span></div>";
-  
-  // Memetakan kunci jawaban PG yang sesuai dengan urutan soal acak di layar siswa
-  let keysMap = {};
-  questionsPG.forEach((q, idx) => {
-    keysMap[idx] = q.kunci;
-  });
+      clearInterval(timerInterval);
+      document.getElementById('examPage').innerHTML = "<div class='text-center py-20 font-black text-2xl'>MENGIRIM JAWABAN...<br><span class='text-sm font-normal'>Status: "+statusOverride+"</span></div>";
+      
+      let keysMap = {};
+      questionsPG.forEach((q, idx) => {
+        keysMap[idx] = q.kunci;
+      });
 
-  await callGAS('processFinalSubmit', {
-    kelas: userData.kelas, 
-    row: userData.row, 
-    answers: answers, 
-    keysMap: keysMap, // Mengirim peta kunci acak ke Apps Script
-    status: statusOverride, 
-    pelanggaran: cheatCount, 
-    catatan: cheatLog.join("\n") 
-  });
-  
-  alert("Jawaban Berhasil Terkirim!");
-  location.reload();
-}
+      await callGAS('processFinalSubmit', {
+        kelas: userData.kelas, 
+        row: userData.row, 
+        answers: answers, 
+        keysMap: keysMap,
+        status: statusOverride, 
+        pelanggaran: cheatCount, 
+        catatan: cheatLog.join("\n"),
+        mapel: selectedMapel
+      });
+      
+      alert("Jawaban Berhasil Terkirim!");
+      location.reload();
+    }
 
     async function loadRekap(kls) {
       if(!kls) return;
